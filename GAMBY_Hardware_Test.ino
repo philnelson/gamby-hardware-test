@@ -1,16 +1,19 @@
 /*
-GAMBY BlockMode Template
+GAMBY Hardware Test v001
 ~~~~~~~~~~~~~~~~~~~~~~~
+An Arduino sketch to load onto your newly-built GAMBY in order to 
+test all of the hardware buttons including the D-Pad, the LCD, 
+and the piezo speaker.
 
-A jump start on using Gamby to draw a 24x16 grid of 4x4 pixel 'blocks.' This 
-skeletal sketch contains the bare minimum required to get Gamby running in 
-BlockMode. Do a "Save As" to make a copy and fill it out with your own code!
-
-by David R. Stokes (gamby@logicalzero.com) 2012-08-28
+Based on GAMBY BlockMode Template from David R. Stokes, with audio code from
+(http://arduino.cc/en/Tutorial/tone)
 */
 
 #include <Gamby.h>
 #include <avr/pgmspace.h>
+#include "pitches.h"
+
+extern prog_int32_t font[];
 
 // A sample palette of blocks, stored in program memory. You can replace one 
 // or all of the individual blocks, but a palette can have no more than 16 
@@ -35,6 +38,13 @@ PROGMEM prog_uint16_t palette[] = {
     0x0001  // 15 Single pixel (upper right)
 };
 
+// notes in the melody:
+int melody[] = {
+  NOTE_C4, NOTE_G3,NOTE_G3, NOTE_A3, NOTE_G3,0, NOTE_B3, NOTE_C4};
+
+// note durations: 4 = quarter note, 8 = eighth note, etc.:
+int noteDurations[] = {
+  4, 8, 8, 4,4,4,4,4 };
 
 // Each of Gamby's 'modes' are wrapped in a class, a self-contained unit
 // that bundles together all the required functionality. To use a mode,
@@ -44,21 +54,31 @@ GambyBlockMode gamby;
 
 int buttonStates[] = {0,0,0,0};
 
+char* helpText = "Push somethin'";
+char* newHelpText = helpText;
+
+int activeButton = 0;
+
 void setup() {
   // Set the block palette. You generally need to do this only once, usually
   // just after initializing Gamby. You could, however, do this elsewhere in 
   // your sketch -- for example, if you had a role-playing game and had an 
   // 'indoor' and an 'outdoor' palette.
   gamby.palette = palette;
+  gamby.font = font;
 }
 
 void loop () {
   
   gamby.readInputs();
   
+  int buttonPressed = 0;
+  
   // Draw Button 1
   if (gamby.inputs & BUTTON_1) {
     drawButtonOne(1);
+    activeButton = 1;
+    buttonPressed = 1;
     //tone(9,10,50);
   }
   else
@@ -68,6 +88,8 @@ void loop () {
   
   // Draw Button 1
   if (gamby.inputs & BUTTON_2) {
+    activeButton = 2;
+    buttonPressed = 1;
     drawButtonTwo(1);
     //tone(9,10,50);
   }
@@ -75,40 +97,223 @@ void loop () {
   {
     drawButtonTwo(2);
   }
+  
+  // Draw Button 1
+  if (gamby.inputs & BUTTON_3) {
+    activeButton = 3;
+    buttonPressed = 1;
+    drawButtonThree(1);
+    //tone(9,10,50);
+  }
+  else
+  {
+    drawButtonThree(2);
+  }
+  
+  // Draw Button 1
+  if (gamby.inputs & BUTTON_4) {
+    activeButton = 4;
+    buttonPressed = 1;
+    drawButtonFour(1);
+    //tone(9,10,50);
+  }
+  else
+  {
+    drawButtonFour(2);
+  }
+  
+  // Draw DPAD Up
+  if (gamby.inputs & DPAD_UP) {
+    activeButton = 5;
+    buttonPressed = 1;
+    drawDpadUp(1);
+    //tone(9,10,50);
+  }
+  else
+  {
+    drawDpadUp(2);
+  }
+  
+  // Draw DPAD Up
+  if (gamby.inputs & DPAD_RIGHT) {
+    activeButton = 6;
+    buttonPressed = 1;
+    drawDpadRight(1);
+    //tone(9,10,50);
+  }
+  else
+  {
+    drawDpadRight(2);
+  }
+  
+  // Draw DPAD Up
+  if (gamby.inputs & DPAD_DOWN) {
+    activeButton = 7;
+    buttonPressed = 1;
+    drawDpadDown(1);
+    //tone(9,10,50);
+  }
+  else
+  {
+    drawDpadDown(2);
+  }
+  
+  // Draw DPAD Up
+  if (gamby.inputs & DPAD_LEFT) {
+    activeButton = 8;
+    buttonPressed = 1;
+    drawDpadLeft(1);
+    //tone(9,10,50);
+  }
+  else
+  {
+    drawDpadLeft(2);
+  }
+  
+  drawHelpText(activeButton,buttonPressed);
 }
 
 void drawButtonOne(int state) {
-    gamby.drawBlock(0,0,state);
-    gamby.drawBlock(0,1,state);
-    gamby.drawBlock(0,2,state);
-    gamby.drawBlock(1,0,state);
-    gamby.drawBlock(1,1,state);
-    gamby.drawBlock(1,2,state);
-    gamby.drawBlock(2,0,state);
-    gamby.drawBlock(2,1,state);
-    gamby.drawBlock(2,2,state);
+    int top = 4;
+    int left = 18;
+    gamby.drawBlock(left+0,top+0,state);
+    gamby.drawBlock(left+0,top+1,state);
+    gamby.drawBlock(left+0,top+2,state);
+    gamby.drawBlock(left+1,top+0,state);
+    gamby.drawBlock(left+1,top+1,state);
+    gamby.drawBlock(left+1,top+2,state);
+    gamby.drawBlock(left+2,top+0,state);
+    gamby.drawBlock(left+2,top+1,state);
+    gamby.drawBlock(left+2,top+2,state);
 }
 
 void drawButtonTwo(int state) {
-    gamby.drawBlock(3,3,state);
-    gamby.drawBlock(3,4,state);
-    gamby.drawBlock(3,5,state);
-    gamby.drawBlock(4,3,state);
-    gamby.drawBlock(4,4,state);
-    gamby.drawBlock(4,5,state);
-    gamby.drawBlock(5,3,state);
-    gamby.drawBlock(5,4,state);
-    gamby.drawBlock(5,5,state);
+    int top = 7;
+    int left = 21;
+    gamby.drawBlock(left+0,top+0,state);
+    gamby.drawBlock(left+0,top+1,state);
+    gamby.drawBlock(left+0,top+2,state);
+    gamby.drawBlock(left+1,top+0,state);
+    gamby.drawBlock(left+1,top+1,state);
+    gamby.drawBlock(left+1,top+2,state);
+    gamby.drawBlock(left+2,top+0,state);
+    gamby.drawBlock(left+2,top+1,state);
+    gamby.drawBlock(left+2,top+2,state);
 }
 
 void drawButtonThree(int state) {
-    gamby.drawBlock(3,3,state);
-    gamby.drawBlock(3,4,state);
-    gamby.drawBlock(3,5,state);
-    gamby.drawBlock(4,3,state);
-    gamby.drawBlock(4,4,state);
-    gamby.drawBlock(4,5,state);
-    gamby.drawBlock(5,3,state);
-    gamby.drawBlock(5,4,state);
-    gamby.drawBlock(5,5,state);
+    int top = 7;
+    int left = 15;
+    gamby.drawBlock(left+0,top+0,state);
+    gamby.drawBlock(left+0,top+1,state);
+    gamby.drawBlock(left+0,top+2,state);
+    gamby.drawBlock(left+1,top+0,state);
+    gamby.drawBlock(left+1,top+1,state);
+    gamby.drawBlock(left+1,top+2,state);
+    gamby.drawBlock(left+2,top+0,state);
+    gamby.drawBlock(left+2,top+1,state);
+    gamby.drawBlock(left+2,top+2,state);
+}
+
+void drawButtonFour(int state) {
+    int top = 10;
+    int left = 18;
+    gamby.drawBlock(left+0,top+0,state);
+    gamby.drawBlock(left+0,top+1,state);
+    gamby.drawBlock(left+0,top+2,state);
+    gamby.drawBlock(left+1,top+0,state);
+    gamby.drawBlock(left+1,top+1,state);
+    gamby.drawBlock(left+1,top+2,state);
+    gamby.drawBlock(left+2,top+0,state);
+    gamby.drawBlock(left+2,top+1,state);
+    gamby.drawBlock(left+2,top+2,state);
+}
+
+void drawDpadUp(int state) {
+    int top = 4;
+    int left = 4;
+    gamby.drawBlock(left+0,top+0,state);
+    gamby.drawBlock(left+0,top+1,state);
+    gamby.drawBlock(left+0,top+2,state);
+    gamby.drawBlock(left+1,top+0,state);
+    gamby.drawBlock(left+1,top+1,state);
+    gamby.drawBlock(left+1,top+2,state);
+    gamby.drawBlock(left+2,top+0,state);
+    gamby.drawBlock(left+2,top+1,state);
+    gamby.drawBlock(left+2,top+2,state);
+}
+
+void drawDpadRight(int state) {
+    int top = 7;
+    int left = 7;
+    gamby.drawBlock(left+0,top+0,state);
+    gamby.drawBlock(left+0,top+1,state);
+    gamby.drawBlock(left+0,top+2,state);
+    gamby.drawBlock(left+1,top+0,state);
+    gamby.drawBlock(left+1,top+1,state);
+    gamby.drawBlock(left+1,top+2,state);
+    gamby.drawBlock(left+2,top+0,state);
+    gamby.drawBlock(left+2,top+1,state);
+    gamby.drawBlock(left+2,top+2,state);
+}
+
+void drawDpadDown(int state) {
+    int top = 10;
+    int left = 4;
+    gamby.drawBlock(left+0,top+0,state);
+    gamby.drawBlock(left+0,top+1,state);
+    gamby.drawBlock(left+0,top+2,state);
+    gamby.drawBlock(left+1,top+0,state);
+    gamby.drawBlock(left+1,top+1,state);
+    gamby.drawBlock(left+1,top+2,state);
+    gamby.drawBlock(left+2,top+0,state);
+    gamby.drawBlock(left+2,top+1,state);
+    gamby.drawBlock(left+2,top+2,state);
+}
+
+void drawDpadLeft(int state) {
+    int top = 7;
+    int left = 1;
+    gamby.drawBlock(left+0,top+0,state);
+    gamby.drawBlock(left+0,top+1,state);
+    gamby.drawBlock(left+0,top+2,state);
+    gamby.drawBlock(left+1,top+0,state);
+    gamby.drawBlock(left+1,top+1,state);
+    gamby.drawBlock(left+1,top+2,state);
+    gamby.drawBlock(left+2,top+0,state);
+    gamby.drawBlock(left+2,top+1,state);
+    gamby.drawBlock(left+2,top+2,state);
+}
+
+void drawHelpText(int state, int buttonPressed) {
+  
+  if(state == 1) {
+    newHelpText = "Button 1";
+  }
+  
+  if(state == 2) {
+    newHelpText = "Button 2";
+  }
+  
+  if(state == 3) {
+    newHelpText = "Button 3";
+  }
+  
+  if(state == 4) {
+    newHelpText = "Button 4";
+  }
+  
+  if(buttonPressed == 0) {
+    newHelpText = "Push somethin'";
+  }
+  
+  gamby.setPos(0,0);
+  if(helpText != newHelpText) {
+    gamby.clearLine();
+  }
+  
+  gamby.print(newHelpText);
+  
+  helpText = newHelpText;
+  
 }
